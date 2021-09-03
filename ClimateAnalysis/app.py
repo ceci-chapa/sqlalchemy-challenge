@@ -31,8 +31,8 @@ def welcome():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/<start> and /api/v1.0/<start>/<end>"
+        f"/api/v1.0/2016-8-23<br/>"
+        f"/api/v1.0/start/2016-8-23/2017-8-23"
 
     )
 
@@ -45,14 +45,11 @@ def get_climate():
     session.close()
 
     # Create a dictionary 
-    all_pre = []
+    date_dict = {}
     for date, prcp in results:
-        date_dict = {}
-        date_dict["date"] = date
-        date_dict["prcp"] = prcp
-        all_pre.append({date : prcp})
+        date_dict[date] = prcp
 
-    return jsonify(all_pre)
+    return jsonify(date_dict)
 
 @app.route("/api/v1.0/stations")
 def get_station():
@@ -70,6 +67,42 @@ def get_station():
     #print(all_stations)
     all_stations = list(np.ravel(results))
     return jsonify(all_stations)
+
+@app.route("/api/v1.0/tobs")
+def get_tobs():
+    session = Session(engine)
+    start_date = dt.date(2017, 8, 23) - dt.timedelta(days=365)
+    results = session.query(M.date, M.tobs).\
+    filter(M.station == 'USC00519281').filter(M.date >= start_date).all()
+    session.close()
+
+    # Create a dictionary 
+    all_tobs = []
+    for date, tobs in results:
+        tobs_dict = {}
+        tobs_dict["date"] = date
+        tobs_dict["tobs"] = tobs
+        all_tobs.append(tobs_dict)
+
+    return jsonify(all_tobs)
+
+@app.route("/api/v1.0/<start>")
+def get_start(start):
+    session = Session(engine)
+    starter_date = ## TODO CONVERT start ( comes in as a stirng) to a date time ( starter_date )
+    results = session.query(M.date, M.tobs).\
+    filter(M.date >= starter_date).all()
+    session.close()
+
+    # Create a dictionary 
+    all_tobs = []
+    for date, tobs in results:
+        tobs_dict = {}
+        tobs_dict["date"] = date
+        tobs_dict["tobs"] = tobs
+        all_tobs.append(tobs_dict)
+
+    return jsonify(all_tobs)
 
 
 if __name__ == '__main__':
