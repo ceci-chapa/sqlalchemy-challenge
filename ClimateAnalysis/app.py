@@ -91,22 +91,22 @@ def get_start(start):
     session = Session(engine)
     starter_date = start.replace(" ", "").lower()
 
-    results = session.query(func.min(M.tobs), func.max(M.tobs), func.avg(M.tobs)).\
+    results = session.query(func.min(M.tobs), func.avg(M.tobs), func.max(M.tobs)).\
     filter(M.date >= starter_date).all()
     session.close()
 
     date_results = list(np.ravel(results))
     return jsonify(date_results)
 
-@app.route("/api/v1.0/range/<start>")   
+ 
 @app.route("/api/v1.0/range/<start>/<end>")
 def get_dates(start=None, end=None):
     session = Session(engine)
     start_date = start.replace(" ", "").lower()
     end_date = end.replace(" ", "").lower()
 
-    range_results = session.query(M.date, func.min(M.tobs), func.max(M.tobs), func.avg(M.tobs)).\
-    filter(M.date >= start_date and M.date <= end_date).all()
+    range_results = session.query(func.min(M.tobs), func.avg(M.tobs), func.max(M.tobs)).\
+    filter(M.date >= start_date, M.date <= end_date).all()
     session.close()
 
     final_results = list(np.ravel(range_results))
