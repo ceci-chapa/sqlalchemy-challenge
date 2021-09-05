@@ -31,8 +31,8 @@ def welcome():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/startdate/2012-02-23<br/>"
-        f"/api/v1.0/start/range/2012-02-23/2016-08-01"
+        f"/api/v1.0/range/2012-02-23<br/>"
+        f"/api/v1.0/range/2016-8-23/2017-8-23"
 
     )
 
@@ -86,31 +86,31 @@ def get_tobs():
 
     return jsonify(all_tobs)
 
-@app.route("/api/v1.0/startdate/<start>")
+@app.route("/api/v1.0/range/<start>")
 def get_start(start):
     session = Session(engine)
     starter_date = start.replace(" ", "").lower()
 
-    results = session.query(M.date, func.min(M.tobs), func.max(M.tobs), func.avg(M.tobs)).\
+    results = session.query(func.min(M.tobs), func.max(M.tobs), func.avg(M.tobs)).\
     filter(M.date >= starter_date).all()
     session.close()
 
     date_results = list(np.ravel(results))
     return jsonify(date_results)
 
-@app.route("/api/v1.0/start/range/<start>/<end>")
-def get_start(start, end):
+@app.route("/api/v1.0/range/<start>")   
+@app.route("/api/v1.0/range/<start>/<end>")
+def get_dates(start=None, end=None):
     session = Session(engine)
     start_date = start.replace(" ", "").lower()
     end_date = end.replace(" ", "").lower()
 
-    results = session.query(M.date, func.min(M.tobs), func.max(M.tobs), func.avg(M.tobs)).\
+    range_results = session.query(M.date, func.min(M.tobs), func.max(M.tobs), func.avg(M.tobs)).\
     filter(M.date >= start_date and M.date <= end_date).all()
     session.close()
 
-    range_results = list(np.ravel(results))
-    return jsonify(range_results)    
-
+    final_results = list(np.ravel(range_results))
+    return jsonify(final_results)   
 
 
 
